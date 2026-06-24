@@ -803,7 +803,7 @@
 
   // ── EDIT MODAL ─────────────────────────────────────────────────────────
   function openEdit(id) {
-    const q = loadData().questions.find(x => x.id === id);
+    const q = (_questions || []).find(x => x.id === id);
     if (!q) return;
     editId = id; editAnswer = q.correctAnswer; editDiff = q.difficulty;
     document.getElementById('e-question').value  = q.text;
@@ -874,7 +874,7 @@
 
   // ── EXPORT / IMPORT ────────────────────────────────────────────────────
   function exportCSV() {
-    const { questions } = loadData();
+    const questions = _questions || [];
     if (!questions.length) { showToast('Geen vragen om te exporteren.'); return; }
     const headers = ['id','text','answerA','answerB','answerC','correctAnswer','category','category2',
                      'difficulty','starters','afvallers','dropoutPct','episode','notes','dateAdded'];
@@ -887,31 +887,44 @@
   function importCSV(e) {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = async ev => {
       const lines = ev.target.result.replace(/^﻿/,'').split('\n').filter(l=>l.trim());
       const headers = lines[0].split(',').map(h=>h.replace(/"/g,''));
-      const data = loadData(); let added = 0;
+      const existing = new Set((_questions||[]).map(q=>q.id));
+      const toImport = [];
+
       for (let i=1;i<lines.length;i++) {
         const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g)||[];
         const obj  = {}; headers.forEach((h,j)=>{ obj[h]=(vals[j]||'').replace(/^"|"$/g,'').replace(/""/g,'"'); });
-        if (obj.id && !data.questions.find(q=>q.id===obj.id)) {
-          obj.starters  = obj.starters  ? parseInt(obj.starters)  : null;
-          obj.afvallers = obj.afvallers !== ''? parseInt(obj.afvallers) : null;
-          obj.dropoutPct= obj.dropoutPct!==''? parseInt(obj.dropoutPct): null;
-          ['category2','difficulty','episode','notes'].forEach(k=>{ obj[k]=obj[k]||null; });
-          data.questions.push(obj); added++;
-        }
+        if (!obj.id || existing.has(obj.id)) continue;
+        obj.starters   = obj.starters   ? parseInt(obj.starters)   : null;
+        obj.afvallers  = obj.afvallers  ? parseInt(obj.afvallers)  : null;
+        obj.dropoutPct = obj.dropoutPct ? parseInt(obj.dropoutPct) : null;
+        ['category2','difficulty','episode','notes'].forEach(k=>{ obj[k]=obj[k]||null; });
+        toImport.push(obj);
       }
-      saveData(data); showToast(`${added} vra${added===1?'ag':'gen'} geïmporteerd ✓`);
-      e.target.value=''; renderStorageInfo();
+
+      if (!toImport.length) { showToast('Geen nieuwe vragen gevonden.'); return; }
+
+      showToast(`${toImport.length} vragen importeren...`);
+      let added = 0;
+      for (const q of toImport) {
+        try { await apiSave(q); added++; } catch { /* skip */ }
+      }
+      renderBank();
+      showToast(`${added} vra${added===1?'ag':'gen'} geïmporteerd ✓`);
+      e.target.value='';
     };
     reader.readAsText(file);
   }
 
-  function clearAll() {
+  async function clearAll() {
     if (!confirm('Weet je zeker dat je ALLE vragen wilt verwijderen?')) return;
     if (!confirm('Echt zeker? Dit kan niet ongedaan worden gemaakt.')) return;
-    localStorage.removeItem('een_vs_100'); updateHeaderStats(); renderStorageInfo();
+    const ids = (_questions||[]).map(q=>q.id);
+    for (const id of ids) { try { await apiDelete(id); } catch { /* skip */ } }
+    _questions = [];
+    updateHeaderStats(); renderStorageInfo();
     showToast('Alle data gewist.');
   }
 
