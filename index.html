@@ -428,8 +428,16 @@
       _questions = _questions.map(mapRow);
     } catch {
       // Fallback naar localStorage als de API niet bereikbaar is
-      try { _questions = JSON.parse(localStorage.getItem('een_vs_100_qs') || '[]'); }
-      catch { _questions = []; }
+      // Controleer ook de oude sleutel (een_vs_100) voor migratie
+      const newKey = lsLoad();
+      if (newKey.length) {
+        _questions = newKey;
+      } else {
+        try {
+          const old = JSON.parse(localStorage.getItem('een_vs_100') || '{}');
+          _questions = old.questions || [];
+        } catch { _questions = []; }
+      }
     }
     updateHeaderStats();
     return _questions;
@@ -448,23 +456,39 @@
     };
   }
 
+  function lsLoad() {
+    try { return JSON.parse(localStorage.getItem('een_vs_100_qs') || '[]'); } catch { return []; }
+  }
+  function lsSave(qs) { localStorage.setItem('een_vs_100_qs', JSON.stringify(qs)); }
+
   async function apiSave(q) {
-    await fetch('/api/questions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(q),
-    });
-    // Voeg toe aan cache
+    try {
+      const res = await fetch('/api/questions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(q),
+      });
+      if (!res.ok) throw new Error('api');
+    } catch {
+      const stored = lsLoad();
+      const idx = stored.findIndex(x => x.id === q.id);
+      if (idx === -1) stored.unshift(q); else stored[idx] = q;
+      lsSave(stored);
+    }
     _questions = [q, ...(_questions || []).filter(x => x.id !== q.id)];
     updateHeaderStats();
   }
 
   async function apiUpdate(id, q) {
-    await fetch(`/api/question?id=${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(q),
-    });
+    try {
+      const res = await fetch(`/api/question?id=${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(q),
+      });
+      if (!res.ok) throw new Error('api');
+    } catch {
+      const stored = lsLoad();
+      const idx = stored.findIndex(x => x.id === id);
+      if (idx !== -1) stored[idx] = { ...stored[idx], ...q };
+      lsSave(stored);
+    }
     if (_questions) {
       const idx = _questions.findIndex(x => x.id === id);
       if (idx !== -1) _questions[idx] = { ..._questions[idx], ...q };
@@ -473,7 +497,12 @@
   }
 
   async function apiDelete(id) {
-    await fetch(`/api/question?id=${id}`, { method: 'DELETE' });
+    try {
+      const res = await fetch(`/api/question?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('api');
+    } catch {
+      lsSave(lsLoad().filter(x => x.id !== id));
+    }
     if (_questions) _questions = _questions.filter(x => x.id !== id);
     updateHeaderStats();
   }
