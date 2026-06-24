@@ -326,8 +326,9 @@
       </div>
 
       <div class="card p-5 mt-4">
-        <div class="text-xs font-bold mb-3 uppercase tracking-widest" style="color:var(--muted);">Opslag</div>
+        <div class="text-xs font-bold mb-3 uppercase tracking-widest" style="color:var(--muted);">Status</div>
         <div id="storage-info" class="space-y-1 text-sm"></div>
+        <div id="api-status" class="mt-3 text-xs"></div>
       </div>
     </div>
 
@@ -936,12 +937,14 @@
       if (!toImport.length) { showToast('Geen nieuwe vragen gevonden.'); return; }
 
       showToast(`${toImport.length} vragen importeren...`);
-      let added = 0;
+      let added = 0, failed = 0;
       for (const q of toImport) {
-        try { await apiSave(q); added++; } catch { /* skip */ }
+        try { await apiSave(q); added++; }
+        catch (err) { console.error('Import fout:', err); failed++; }
       }
       renderBank();
-      showToast(`${added} vra${added===1?'ag':'gen'} geïmporteerd ✓`);
+      if (failed > 0) showToast(`${added} geïmporteerd, ${failed} mislukt — zie console`);
+      else showToast(`${added} vra${added===1?'ag':'gen'} geïmporteerd ✓`);
       e.target.value='';
     };
     reader.readAsText(file);
@@ -957,11 +960,27 @@
     showToast('Alle data gewist.');
   }
 
-  function renderStorageInfo() {
+  async function renderStorageInfo() {
     const questions = _questions || [];
     document.getElementById('storage-info').innerHTML = `
-      <div class="flex justify-between"><span style="color:var(--muted);">Vragen</span><span>${questions.length}</span></div>
-      <div class="flex justify-between"><span style="color:var(--muted);">Locatie</span><span style="color:var(--muted);">Neon Postgres</span></div>`;
+      <div class="flex justify-between"><span style="color:var(--muted);">Vragen</span><span>${questions.length}</span></div>`;
+    const statusEl = document.getElementById('api-status');
+    statusEl.textContent = 'API verbinding testen...';
+    statusEl.style.color = 'var(--muted)';
+    try {
+      const res = await fetch('/api/questions');
+      if (res.ok) {
+        statusEl.textContent = '● Database verbonden';
+        statusEl.style.color = '#4ade80';
+      } else {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        statusEl.textContent = `● API fout: ${err.error || res.statusText}`;
+        statusEl.style.color = '#f87171';
+      }
+    } catch {
+      statusEl.textContent = '● Geen API (localhost modus)';
+      statusEl.style.color = '#fbbf24';
+    }
   }
 
   // ── HEADER STATS ───────────────────────────────────────────────────────
