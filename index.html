@@ -5,488 +5,488 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>1 vs 100 Trainer</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            navy: { 900: '#0a0f1e', 800: '#111827', 700: '#1e2a3a', 600: '#243447' },
-            gold: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
-          }
-        }
-      }
-    }
-  </script>
   <style>
-    body { background: #0a0f1e; color: white; font-family: system-ui, sans-serif; }
-    .tab-active { background: #f59e0b; color: #0a0f1e; }
-    .tab-inactive { color: #94a3b8; }
-    .tab-inactive:hover { color: white; background: #1e2a3a; }
-    input, textarea, select {
-      background: #111827; border: 1px solid #374151; color: white;
-      border-radius: 0.5rem; padding: 0.5rem 0.75rem; width: 100%;
-      font-size: 0.875rem; outline: none; transition: border-color 0.15s;
+    :root {
+      --bg:        #0e0e10;
+      --surface:   #18181b;
+      --elevated:  #222226;
+      --border:    #2e2e34;
+      --border-hi: #3f3f46;
+      --text:      #ffffff;
+      --muted:     #71717a;
+      --placeholder:#52525b;
+      --amber:     #f59e0b;
+      --amber-hi:  #fbbf24;
+      --amber-text:#0e0e10;
+      --green:     #22c55e;
+      --red:       #ef4444;
     }
-    input:focus, textarea:focus, select:focus { border-color: #f59e0b; }
-    input::placeholder, textarea::placeholder { color: #4b5563; }
-    select option { background: #111827; }
-    .bar { height: 20px; border-radius: 4px; transition: width 0.4s ease; }
-    .badge-hard { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-    .badge-easy { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
-    .badge-mid  { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
-    .card { background: #111827; border: 1px solid #1f2937; border-radius: 1rem; }
-    .btn-primary { background: #f59e0b; color: #0a0f1e; font-weight: 700; padding: 0.6rem 1.25rem; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.875rem; transition: background 0.15s; }
-    .btn-primary:hover { background: #fbbf24; }
-    .btn-secondary { background: #1e2a3a; color: #cbd5e1; font-weight: 600; padding: 0.6rem 1.25rem; border-radius: 0.5rem; border: 1px solid #374151; cursor: pointer; font-size: 0.875rem; transition: background 0.15s; }
-    .btn-secondary:hover { background: #243447; color: white; }
-    .btn-danger { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 0.35rem 0.75rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: background 0.15s; }
-    .btn-danger:hover { background: rgba(239,68,68,0.25); }
-    .sort-btn { background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.7rem; padding: 0 2px; }
-    .sort-btn.active { color: #f59e0b; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #111827; }
-    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+
+    /* Inputs */
+    input, textarea, select {
+      background: var(--elevated); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 9px 12px; width: 100%;
+      font-size: 14px; outline: none; transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--amber); }
+    input::placeholder, textarea::placeholder { color: var(--placeholder); }
+    select option { background: var(--surface); }
+    textarea { resize: vertical; }
+
+    /* Cards */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; border-radius: 8px; padding: 9px 18px; cursor: pointer; border: none; transition: background 0.12s, color 0.12s; font-family: inherit; }
+    .btn-primary { background: var(--amber); color: var(--amber-text); font-weight: 700; }
+    .btn-primary:hover { background: var(--amber-hi); }
+    .btn-ghost { background: var(--elevated); color: #a1a1aa; border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--border); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.25); padding: 5px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit; transition: background 0.12s; }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+    .btn-edit { background: var(--elevated); color: #a1a1aa; border: 1px solid var(--border); padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit; transition: background 0.12s; }
+    .btn-edit:hover { color: var(--text); }
+
+    /* Tabs */
+    .tab-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; display: flex; gap: 3px; }
+    .tab { flex: 1; padding: 8px 12px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: background 0.12s, color 0.12s; font-family: inherit; }
+    .tab.active { background: var(--amber); color: var(--amber-text); }
+    .tab:not(.active):hover { background: var(--elevated); color: var(--text); }
+
+    /* Segmented control */
+    .seg { display: flex; gap: 3px; padding: 4px; border-radius: 10px; background: var(--elevated); }
+    .seg-btn { flex: 1; padding: 8px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: background 0.12s, color 0.12s; font-family: inherit; }
+    .seg-btn.active { background: var(--amber); color: var(--amber-text); }
+
+    /* Toggle buttons (makkelijk/moeilijk) */
+    .tog { flex: 1; padding: 9px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: var(--elevated); color: var(--muted); transition: all 0.12s; font-family: inherit; }
+    .tog.active-easy  { background: rgba(34,197,94,0.12); color: #4ade80; border-color: rgba(34,197,94,0.35); }
+    .tog.active-hard  { background: rgba(239,68,68,0.12); color: #f87171; border-color: rgba(239,68,68,0.35); }
+
+    /* Answer selector bubbles */
+    .ans-btn { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; cursor: pointer; background: var(--elevated); border: 2px solid var(--border); color: var(--muted); transition: all 0.12s; user-select: none; }
+    .ans-btn.active { background: var(--amber); color: var(--amber-text); border-color: var(--amber); }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .badge-hard { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+    .badge-easy { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+    .badge-mid  { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+
+    /* Section label */
+    .label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+
+    /* Divider */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    /* Bar chart */
+    .bar { height: 6px; border-radius: 3px; transition: width 0.4s ease; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--surface); }
+    ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
   </style>
 </head>
-<body class="min-h-screen">
+<body>
 
   <!-- Header -->
-  <header class="border-b border-gray-800 sticky top-0 z-50" style="background: #0a0f1e;">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+  <header style="background:var(--surface);border-bottom:1px solid var(--border);" class="sticky top-0 z-40">
+    <div class="max-w-3xl mx-auto px-5 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full flex items-center justify-center font-black text-sm" style="background: #f59e0b; color: #0a0f1e;">1v</div>
+        <div style="background:var(--amber);color:var(--amber-text);" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs">1v</div>
         <div>
-          <div class="font-black text-white text-base leading-tight">Één tegen 100</div>
-          <div class="text-xs text-gray-500 leading-tight">Trainer Tool</div>
+          <div class="font-black text-sm leading-tight">Één tegen 100</div>
+          <div class="text-xs leading-tight" style="color:var(--muted);">Trainer Tool</div>
         </div>
       </div>
-      <div id="header-stats" class="flex gap-4 text-right">
+      <div class="flex gap-5 text-right">
         <div>
-          <div id="hs-total" class="font-black text-gold-400 text-lg leading-tight">0</div>
-          <div class="text-xs text-gray-500">vragen</div>
+          <div id="hs-total" class="font-black text-base leading-tight" style="color:var(--amber);">0</div>
+          <div class="text-xs" style="color:var(--muted);">vragen</div>
         </div>
         <div>
-          <div id="hs-avg" class="font-black text-lg leading-tight text-white">—</div>
-          <div class="text-xs text-gray-500">gem. afval</div>
+          <div id="hs-avg" class="font-black text-base leading-tight">—</div>
+          <div class="text-xs" style="color:var(--muted);">gem. afval</div>
         </div>
       </div>
     </div>
   </header>
 
   <!-- Tabs -->
-  <div class="max-w-5xl mx-auto px-4 pt-4">
-    <div class="flex gap-1 p-1 rounded-xl mb-6" style="background: #111827;">
-      <button onclick="switchTab('invoer')" id="tab-invoer" class="tab-active flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all">+ Invoeren</button>
-      <button onclick="switchTab('bank')" id="tab-bank" class="tab-inactive flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all">Vragenbank</button>
-      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-inactive flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all">Dashboard</button>
-      <button onclick="switchTab('export')" id="tab-export" class="tab-inactive flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all">Export</button>
+  <div class="max-w-3xl mx-auto px-5 pt-5 pb-1">
+    <div class="tab-bar">
+      <button class="tab active" id="tab-invoer"    onclick="switchTab('invoer')">+ Invoeren</button>
+      <button class="tab"        id="tab-bank"      onclick="switchTab('bank')">Vragenbank</button>
+      <button class="tab"        id="tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="tab"        id="tab-export"    onclick="switchTab('export')">Export</button>
     </div>
   </div>
 
-  <!-- Main content -->
-  <main class="max-w-5xl mx-auto px-4 pb-16">
+  <main class="max-w-3xl mx-auto px-5 py-6 pb-20">
 
-    <!-- TAB: INVOER -->
+    <!-- ── INVOER ─────────────────────────────────────────────────────── -->
     <div id="panel-invoer">
-      <div class="card p-6 max-w-2xl mx-auto">
-        <h2 class="text-lg font-black text-white mb-5">Nieuwe vraag toevoegen</h2>
+      <div class="card p-6 max-w-xl mx-auto">
 
-        <div class="space-y-4">
-          <!-- Vraag -->
-          <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Vraag</label>
-            <textarea id="f-question" rows="2" placeholder="Typ hier de vraag..."></textarea>
+        <!-- Type vraag -->
+        <div class="mb-5">
+          <span class="label">Type vraag</span>
+          <div class="seg">
+            <button class="seg-btn active" id="cm-moeilijkheid" onclick="setClassMode('moeilijkheid')">Één categorie</button>
+            <button class="seg-btn"        id="cm-twee_cat"     onclick="setClassMode('twee_cat')">Twee categorieën</button>
           </div>
 
-          <!-- Antwoorden -->
-          <div class="grid grid-cols-1 gap-2">
-            <label class="block text-xs font-semibold text-gray-400 mb-0.5 uppercase tracking-wide">Antwoorden</label>
+          <div id="cl-moeilijkheid" class="mt-3 space-y-2">
+            <input id="f-category" placeholder="Categorie (bijv. Sport, Muziek, Film...)" />
+            <div class="flex gap-2">
+              <button class="tog" id="diff-makkelijk" onclick="selectDifficulty('makkelijk')">Makkelijk</button>
+              <button class="tog" id="diff-moeilijk"  onclick="selectDifficulty('moeilijk')">Moeilijk</button>
+            </div>
+          </div>
+
+          <div id="cl-twee_cat" class="hidden mt-3 space-y-2">
+            <input id="f-cat1" placeholder="Eerste categorie..." />
+            <input id="f-cat2" placeholder="Tweede categorie..." />
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Vraag -->
+        <div class="mb-4">
+          <span class="label">Vraag</span>
+          <textarea id="f-question" rows="2" placeholder="Typ hier de vraag..."></textarea>
+        </div>
+
+        <!-- Antwoorden -->
+        <div class="mb-4">
+          <span class="label">Antwoorden — klik op de letter voor het juiste antwoord</span>
+          <div class="space-y-2">
             <div class="flex gap-2 items-center">
-              <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 cursor-pointer answer-btn" data-val="A" onclick="selectAnswer('A')" style="background:#1e2a3a; border:2px solid #374151;">A</div>
+              <div class="ans-btn" id="ab-A" data-val="A" onclick="selectAnswer('A')">A</div>
               <input id="f-ans-a" placeholder="Antwoord A" />
             </div>
             <div class="flex gap-2 items-center">
-              <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 cursor-pointer answer-btn" data-val="B" onclick="selectAnswer('B')" style="background:#1e2a3a; border:2px solid #374151;">B</div>
+              <div class="ans-btn" id="ab-B" data-val="B" onclick="selectAnswer('B')">B</div>
               <input id="f-ans-b" placeholder="Antwoord B" />
             </div>
             <div class="flex gap-2 items-center">
-              <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 cursor-pointer answer-btn" data-val="C" onclick="selectAnswer('C')" style="background:#1e2a3a; border:2px solid #374151;">C</div>
+              <div class="ans-btn" id="ab-C" data-val="C" onclick="selectAnswer('C')">C</div>
               <input id="f-ans-c" placeholder="Antwoord C" />
             </div>
-            <div id="answer-hint" class="text-xs text-gray-500 mt-1 hidden">Klik op A/B/C om het juiste antwoord te selecteren</div>
           </div>
+        </div>
 
-          <!-- Categorie + Aflevering -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Categorie</label>
-              <select id="f-category" onchange="handleCategoryChange()">
-                <option value="">Kies categorie...</option>
-                <option>Sport</option>
-                <option>Muziek</option>
-                <option>Film & TV</option>
-                <option>Geschiedenis</option>
-                <option>Aardrijkskunde</option>
-                <option>Wetenschap & Natuur</option>
-                <option>Kunst & Cultuur</option>
-                <option>Politiek & Actualiteit</option>
-                <option>Taal & Literatuur</option>
-                <option>Eten & Drinken</option>
-                <option>Celebrities</option>
-                <option>Nederland</option>
-                <option>Technologie</option>
-                <option>Algemene Kennis</option>
-                <option value="__custom__">+ Eigen categorie...</option>
-              </select>
-              <input id="f-category-custom" placeholder="Eigen categorie" class="mt-2 hidden" />
+        <hr class="divider" />
+
+        <!-- Afvalpercentage -->
+        <div class="mb-4">
+          <span class="label">Afvalpercentage</span>
+          <div class="flex gap-3 items-end">
+            <div class="flex-1">
+              <div class="text-xs mb-1" style="color:var(--muted);">Starters</div>
+              <input id="f-starters" type="number" min="0" placeholder="100" oninput="calcDropout()" />
             </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Aflevering <span class="text-gray-600 normal-case font-normal">(optioneel)</span></label>
-              <input id="f-episode" placeholder="bijv. S1E3 of 14 jan 2024" />
+            <div class="flex-1">
+              <div class="text-xs mb-1" style="color:var(--muted);">Afvallers</div>
+              <input id="f-afvallers" type="number" min="0" placeholder="55" oninput="calcDropout()" />
+            </div>
+            <div style="width:72px;" class="text-center pb-1">
+              <div class="text-xs mb-1" style="color:var(--muted);">% Afval</div>
+              <div id="dropout-preview" class="text-2xl font-black" style="color:var(--muted);">—</div>
             </div>
           </div>
+        </div>
 
-          <!-- Classificatie toggle -->
+        <!-- Aflevering + Notities -->
+        <div class="grid grid-cols-2 gap-3 mb-5">
           <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Classificatie</label>
-            <div class="flex gap-2 mb-3">
-              <button onclick="setClassMode('moeilijkheid')" id="cm-moeilijkheid" class="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all" style="background:#f59e0b;color:#0a0f1e;border-color:#f59e0b;">Makkelijk / Moeilijk</button>
-              <button onclick="setClassMode('twee_cat')" id="cm-twee_cat" class="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all" style="background:#1e2a3a;color:#94a3b8;border-color:#374151;">Twee categorieën</button>
-            </div>
-            <div id="cl-moeilijkheid" class="flex gap-2">
-              <button onclick="selectDifficulty('makkelijk')" id="diff-makkelijk" class="flex-1 py-2 rounded-lg text-sm font-bold border transition-all" style="background:#1e2a3a;color:#94a3b8;border-color:#374151;">Makkelijk</button>
-              <button onclick="selectDifficulty('moeilijk')" id="diff-moeilijk" class="flex-1 py-2 rounded-lg text-sm font-bold border transition-all" style="background:#1e2a3a;color:#94a3b8;border-color:#374151;">Moeilijk</button>
-            </div>
-            <div id="cl-twee_cat" class="hidden">
-              <select id="f-cat2">
-                <option value="">Tweede categorie...</option>
-                <option>Sport</option>
-                <option>Muziek</option>
-                <option>Film & TV</option>
-                <option>Geschiedenis</option>
-                <option>Aardrijkskunde</option>
-                <option>Wetenschap & Natuur</option>
-                <option>Kunst & Cultuur</option>
-                <option>Politiek & Actualiteit</option>
-                <option>Taal & Literatuur</option>
-                <option>Eten & Drinken</option>
-                <option>Celebrities</option>
-                <option>Nederland</option>
-                <option>Technologie</option>
-                <option>Algemene Kennis</option>
-              </select>
-            </div>
+            <span class="label">Aflevering <span style="color:var(--placeholder);text-transform:none;font-weight:400;">(optioneel)</span></span>
+            <input id="f-episode" placeholder="bijv. S1E3" />
           </div>
-
-          <!-- Afvalpercentage -->
           <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Afvalpercentage</label>
-            <div class="grid grid-cols-3 gap-3 items-end">
-              <div>
-                <div class="text-xs text-gray-500 mb-1">Starters</div>
-                <input id="f-starters" type="number" min="0" placeholder="100" oninput="calcDropout()" />
-              </div>
-              <div>
-                <div class="text-xs text-gray-500 mb-1">Overgebleven</div>
-                <input id="f-remaining" type="number" min="0" placeholder="45" oninput="calcDropout()" />
-              </div>
-              <div class="text-center">
-                <div class="text-xs text-gray-500 mb-1">% Afval</div>
-                <div id="dropout-preview" class="text-2xl font-black text-gray-500">—</div>
-              </div>
-            </div>
+            <span class="label">Notities <span style="color:var(--placeholder);text-transform:none;font-weight:400;">(optioneel)</span></span>
+            <input id="f-notes" placeholder="Extra context..." />
           </div>
+        </div>
 
-          <!-- Notities -->
-          <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Notities <span class="text-gray-600 normal-case font-normal">(optioneel)</span></label>
-            <textarea id="f-notes" rows="1" placeholder="Extra context, ezelsbruggetje..."></textarea>
-          </div>
-
-          <!-- Buttons -->
-          <div id="form-error" class="text-red-400 text-sm hidden"></div>
-          <div class="flex gap-3 pt-2">
-            <button onclick="submitForm()" class="btn-primary flex-1">Vraag opslaan</button>
-            <button onclick="resetForm()" class="btn-secondary">Wissen</button>
-          </div>
+        <div id="form-error" class="text-sm mb-3 hidden" style="color:#f87171;"></div>
+        <div class="flex gap-2">
+          <button onclick="submitForm()" class="btn btn-primary" style="flex:1;">Vraag opslaan</button>
+          <button onclick="resetForm()"  class="btn btn-ghost">Wissen</button>
         </div>
       </div>
     </div>
 
-    <!-- TAB: VRAGENBANK -->
+    <!-- ── VRAGENBANK ─────────────────────────────────────────────────── -->
     <div id="panel-bank" class="hidden">
-      <!-- Filter bar -->
       <div class="flex flex-wrap gap-2 mb-4">
-        <input id="bank-search" placeholder="Zoeken op vraag..." oninput="renderBank()" style="width:220px;flex:1;min-width:160px;" />
-        <select id="bank-cat" onchange="renderBank()" style="width:160px;">
-          <option value="">Alle categorieën</option>
-        </select>
-        <select id="bank-diff" onchange="renderBank()" style="width:150px;">
+        <input id="bank-search" placeholder="Zoeken..." oninput="renderBank()" style="flex:1;min-width:140px;max-width:240px;" />
+        <select id="bank-cat"  onchange="renderBank()" style="width:150px;"><option value="">Alle categorieën</option></select>
+        <select id="bank-diff" onchange="renderBank()" style="width:140px;">
           <option value="">Alle moeilijkheid</option>
           <option value="makkelijk">Makkelijk</option>
           <option value="moeilijk">Moeilijk</option>
         </select>
-        <select id="bank-sort" onchange="renderBank()" style="width:170px;">
+        <select id="bank-sort" onchange="renderBank()" style="width:160px;">
           <option value="date-desc">Nieuwste eerst</option>
           <option value="date-asc">Oudste eerst</option>
-          <option value="dropout-desc">Hoogste afval %</option>
-          <option value="dropout-asc">Laagste afval %</option>
+          <option value="dropout-desc">Meest afval</option>
+          <option value="dropout-asc">Minst afval</option>
           <option value="cat-asc">Categorie A–Z</option>
         </select>
       </div>
-
-      <div id="bank-count" class="text-xs text-gray-500 mb-3"></div>
-
-      <!-- Question cards -->
-      <div id="bank-list" class="space-y-2"></div>
+      <div id="bank-count" class="text-xs mb-3" style="color:var(--muted);"></div>
+      <div id="bank-list"  class="space-y-2"></div>
       <div id="bank-empty" class="card p-10 text-center hidden">
-        <div class="text-4xl mb-3">📋</div>
-        <p class="text-gray-400 text-sm">Nog geen vragen in de bank. Voeg er eerst een paar toe!</p>
+        <p class="text-sm" style="color:var(--muted);">Nog geen vragen. Voeg er eerst een paar toe.</p>
       </div>
     </div>
 
-    <!-- TAB: DASHBOARD -->
+    <!-- ── DASHBOARD ──────────────────────────────────────────────────── -->
     <div id="panel-dashboard" class="hidden">
-      <!-- Stat cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         <div class="card p-4 text-center">
-          <div id="stat-total" class="text-3xl font-black text-gold-400">0</div>
-          <div class="text-xs text-gray-500 mt-1">Totaal vragen</div>
+          <div id="stat-total" class="text-3xl font-black" style="color:var(--amber);">0</div>
+          <div class="text-xs mt-1" style="color:var(--muted);">Totaal vragen</div>
         </div>
         <div class="card p-4 text-center">
-          <div id="stat-avg" class="text-3xl font-black text-white">—</div>
-          <div class="text-xs text-gray-500 mt-1">Gem. afval %</div>
+          <div id="stat-avg" class="text-3xl font-black">—</div>
+          <div class="text-xs mt-1" style="color:var(--muted);">Gem. afval %</div>
         </div>
         <div class="card p-4 text-center">
-          <div id="stat-hardest" class="text-xl font-black text-red-400 leading-tight">—</div>
-          <div class="text-xs text-gray-500 mt-1">Moeilijkste cat.</div>
+          <div id="stat-hardest" class="text-lg font-black leading-snug" style="color:#f87171;">—</div>
+          <div class="text-xs mt-1" style="color:var(--muted);">Moeilijkste</div>
         </div>
         <div class="card p-4 text-center">
-          <div id="stat-easiest" class="text-xl font-black text-green-400 leading-tight">—</div>
-          <div class="text-xs text-gray-500 mt-1">Makkelijkste cat.</div>
+          <div id="stat-easiest" class="text-lg font-black leading-snug" style="color:#4ade80;">—</div>
+          <div class="text-xs mt-1" style="color:var(--muted);">Makkelijkste</div>
         </div>
       </div>
 
-      <!-- Categorie analyse -->
       <div class="card p-5 mb-4">
-        <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wide">Afval % per categorie</h3>
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted);">Afval % per categorie</div>
+          <div class="text-xs flex gap-3" style="color:var(--placeholder);">
+            <span><span style="color:#4ade80;">●</span> n≥50</span>
+            <span><span style="color:#fbbf24;">●</span> n≥15</span>
+            <span><span style="color:#71717a;">●</span> n&lt;15</span>
+          </div>
+        </div>
         <div id="cat-chart" class="space-y-3"></div>
-        <div id="cat-empty" class="text-gray-500 text-sm text-center py-4 hidden">Nog geen data.</div>
+        <div id="cat-empty" class="text-sm text-center py-4 hidden" style="color:var(--muted);">Nog geen data.</div>
       </div>
 
-      <!-- Twee secties naast elkaar -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- Moeilijke vragen -->
         <div class="card p-5">
-          <h3 class="text-sm font-bold text-red-400 mb-3 uppercase tracking-wide">⚠ Moeilijk (&gt;60% afval)</h3>
+          <div class="text-xs font-bold mb-3 uppercase tracking-widest" style="color:#f87171;">Moeilijk &gt;60% afval</div>
           <div id="hard-list" class="space-y-1.5"></div>
-          <div id="hard-empty" class="text-gray-500 text-sm hidden">Geen vragen &gt;60% afval.</div>
+          <div id="hard-empty" class="text-sm hidden" style="color:var(--muted);">Geen vragen boven 60%.</div>
         </div>
-        <!-- Makkelijke vragen -->
         <div class="card p-5">
-          <h3 class="text-sm font-bold text-green-400 mb-3 uppercase tracking-wide">✓ Makkelijk (&lt;20% afval)</h3>
+          <div class="text-xs font-bold mb-3 uppercase tracking-widest" style="color:#4ade80;">Makkelijk &lt;20% afval</div>
           <div id="easy-list" class="space-y-1.5"></div>
-          <div id="easy-empty" class="text-gray-500 text-sm hidden">Geen vragen &lt;20% afval.</div>
+          <div id="easy-empty" class="text-sm hidden" style="color:var(--muted);">Geen vragen onder 20%.</div>
         </div>
       </div>
     </div>
 
-    <!-- TAB: EXPORT -->
-    <div id="panel-export" class="hidden max-w-lg mx-auto">
+    <!-- ── EXPORT ─────────────────────────────────────────────────────── -->
+    <div id="panel-export" class="hidden max-w-sm mx-auto">
       <div class="card p-6 space-y-5">
         <div>
-          <h3 class="text-base font-bold text-white mb-1">Exporteren</h3>
-          <p class="text-gray-500 text-sm">Download al je vragen als CSV-bestand voor backup of analyse in Excel.</p>
+          <div class="font-bold mb-1">Exporteren</div>
+          <p class="text-sm" style="color:var(--muted);">Download al je vragen als CSV voor backup of Excel.</p>
         </div>
-        <button onclick="exportCSV()" class="btn-primary w-full">⬇ Download CSV</button>
+        <button onclick="exportCSV()" class="btn btn-primary w-full">↓ Download CSV</button>
 
-        <div class="border-t border-gray-800 pt-5">
-          <h3 class="text-base font-bold text-white mb-1">Importeren</h3>
-          <p class="text-gray-500 text-sm mb-3">Laad een eerder geëxporteerd CSV-bestand in. Bestaande vragen worden <strong class="text-white">niet</strong> overschreven.</p>
-          <label class="btn-secondary cursor-pointer w-full text-center block">
-            ⬆ CSV importeren
+        <hr class="divider" />
+
+        <div>
+          <div class="font-bold mb-1">Importeren</div>
+          <p class="text-sm mb-3" style="color:var(--muted);">Laad een eerder geëxporteerd CSV-bestand. Bestaande vragen worden niet overschreven.</p>
+          <label class="btn btn-ghost w-full cursor-pointer" style="display:flex;">
+            ↑ CSV importeren
             <input type="file" accept=".csv" onchange="importCSV(event)" class="hidden" />
           </label>
         </div>
 
-        <div class="border-t border-gray-800 pt-5">
-          <h3 class="text-base font-bold text-red-400 mb-1">Danger zone</h3>
-          <p class="text-gray-500 text-sm mb-3">Verwijder alle vragen permanent uit de lokale opslag.</p>
-          <button onclick="clearAll()" class="btn-danger w-full py-2">Alle data wissen</button>
+        <hr class="divider" />
+
+        <div>
+          <div class="font-bold mb-1" style="color:#f87171;">Danger zone</div>
+          <p class="text-sm mb-3" style="color:var(--muted);">Verwijder alle vragen permanent uit de lokale opslag.</p>
+          <button onclick="clearAll()" class="btn-danger" style="width:100%;padding:9px;">Alle data wissen</button>
         </div>
       </div>
 
       <div class="card p-5 mt-4">
-        <h3 class="text-sm font-bold text-gray-400 mb-2 uppercase tracking-wide">Opslag info</h3>
-        <div id="storage-info" class="text-sm text-gray-300 space-y-1"></div>
+        <div class="text-xs font-bold mb-3 uppercase tracking-widest" style="color:var(--muted);">Opslag</div>
+        <div id="storage-info" class="space-y-1 text-sm"></div>
       </div>
     </div>
 
   </main>
 
-  <!-- Edit Modal -->
-  <div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.8);">
-    <div class="card p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+  <!-- ── EDIT MODAL ────────────────────────────────────────────────────── -->
+  <div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.75);">
+    <div class="card p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-5">
-        <h2 class="text-lg font-black text-white">Vraag bewerken</h2>
-        <button onclick="closeEdit()" class="text-gray-500 hover:text-white text-xl leading-none">✕</button>
+        <div class="font-black text-base">Vraag bewerken</div>
+        <button onclick="closeEdit()" style="color:var(--muted);font-size:18px;line-height:1;background:none;border:none;cursor:pointer;">✕</button>
       </div>
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Vraag</label>
+          <span class="label">Vraag</span>
           <textarea id="e-question" rows="2"></textarea>
         </div>
-        <div class="space-y-2">
-          <label class="block text-xs font-semibold text-gray-400 mb-0.5 uppercase tracking-wide">Antwoorden</label>
-          <div class="flex gap-2 items-center">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 cursor-pointer edit-answer-btn" data-val="A" onclick="selectEditAnswer('A')" style="background:#1e2a3a;border:2px solid #374151;">A</div>
-            <input id="e-ans-a" placeholder="Antwoord A" />
-          </div>
-          <div class="flex gap-2 items-center">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 cursor-pointer edit-answer-btn" data-val="B" onclick="selectEditAnswer('B')" style="background:#1e2a3a;border:2px solid #374151;">B</div>
-            <input id="e-ans-b" placeholder="Antwoord B" />
-          </div>
-          <div class="flex gap-2 items-center">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 cursor-pointer edit-answer-btn" data-val="C" onclick="selectEditAnswer('C')" style="background:#1e2a3a;border:2px solid #374151;">C</div>
-            <input id="e-ans-c" placeholder="Antwoord C" />
+        <div>
+          <span class="label">Antwoorden</span>
+          <div class="space-y-2">
+            <div class="flex gap-2 items-center">
+              <div class="ans-btn" id="eab-A" data-val="A" onclick="selectEditAnswer('A')">A</div>
+              <input id="e-ans-a" placeholder="Antwoord A" />
+            </div>
+            <div class="flex gap-2 items-center">
+              <div class="ans-btn" id="eab-B" data-val="B" onclick="selectEditAnswer('B')">B</div>
+              <input id="e-ans-b" placeholder="Antwoord B" />
+            </div>
+            <div class="flex gap-2 items-center">
+              <div class="ans-btn" id="eab-C" data-val="C" onclick="selectEditAnswer('C')">C</div>
+              <input id="e-ans-c" placeholder="Antwoord C" />
+            </div>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Categorie</label>
-            <select id="e-category">
-              <option>Sport</option><option>Muziek</option><option>Film & TV</option>
-              <option>Geschiedenis</option><option>Aardrijkskunde</option><option>Wetenschap & Natuur</option>
-              <option>Kunst & Cultuur</option><option>Politiek & Actualiteit</option><option>Taal & Literatuur</option>
-              <option>Eten & Drinken</option><option>Celebrities</option><option>Nederland</option>
-              <option>Technologie</option><option>Algemene Kennis</option>
-            </select>
+            <span class="label">Categorie</span>
+            <input id="e-category" placeholder="Categorie..." />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Aflevering</label>
+            <span class="label">Aflevering</span>
             <input id="e-episode" placeholder="optioneel" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Starters</label>
+            <span class="label">Starters</span>
             <input id="e-starters" type="number" min="0" oninput="calcEditDropout()" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Overgebleven</label>
-            <input id="e-remaining" type="number" min="0" oninput="calcEditDropout()" />
+            <span class="label">Afvallers</span>
+            <input id="e-afvallers" type="number" min="0" oninput="calcEditDropout()" />
           </div>
         </div>
-        <div class="text-center">
-          <span class="text-xs text-gray-500">Afval: </span>
-          <span id="e-dropout-preview" class="font-black text-white">—</span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs" style="color:var(--muted);">Afval:</span>
+          <span id="e-dropout-preview" class="font-black">—</span>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Moeilijkheid</label>
+          <span class="label">Moeilijkheid</span>
           <div class="flex gap-2">
-            <button onclick="selectEditDifficulty('makkelijk')" id="e-diff-makkelijk" class="flex-1 py-1.5 rounded-lg text-sm font-bold border transition-all" style="background:#1e2a3a;color:#94a3b8;border-color:#374151;">Makkelijk</button>
-            <button onclick="selectEditDifficulty('moeilijk')" id="e-diff-moeilijk" class="flex-1 py-1.5 rounded-lg text-sm font-bold border transition-all" style="background:#1e2a3a;color:#94a3b8;border-color:#374151;">Moeilijk</button>
-            <button onclick="selectEditDifficulty(null)" id="e-diff-none" class="flex-1 py-1.5 rounded-lg text-sm font-bold border transition-all" style="background:#f59e0b;color:#0a0f1e;border-color:#f59e0b;">Geen</button>
+            <button onclick="selectEditDifficulty('makkelijk')" id="e-diff-makkelijk" class="tog flex-1">Makkelijk</button>
+            <button onclick="selectEditDifficulty('moeilijk')"  id="e-diff-moeilijk"  class="tog flex-1">Moeilijk</button>
+            <button onclick="selectEditDifficulty(null)"        id="e-diff-none"       class="tog flex-1">Geen</button>
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Notities</label>
-          <textarea id="e-notes" rows="1"></textarea>
+          <span class="label">Notities</span>
+          <input id="e-notes" placeholder="optioneel" />
         </div>
       </div>
-      <div class="flex gap-3 mt-5">
-        <button onclick="saveEdit()" class="btn-primary flex-1">Opslaan</button>
-        <button onclick="closeEdit()" class="btn-secondary">Annuleer</button>
+      <div class="flex gap-2 mt-5">
+        <button onclick="saveEdit()"  class="btn btn-primary" style="flex:1;">Opslaan</button>
+        <button onclick="closeEdit()" class="btn btn-ghost">Annuleer</button>
       </div>
     </div>
   </div>
 
   <script>
-  // ─── STATE ────────────────────────────────────────────────────────────
-  let currentTab = 'invoer';
-  let classMode = 'moeilijkheid';
+  // ── STATE ──────────────────────────────────────────────────────────────
+  let currentTab   = 'invoer';
+  let classMode    = 'moeilijkheid';
   let selectedAnswer = null;
-  let selectedDiff = null;
-  let editId = null;
-  let editAnswer = null;
-  let editDiff = null;
+  let selectedDiff   = null;
+  let editId = null, editAnswer = null, editDiff = null;
 
-  // ─── DATA ─────────────────────────────────────────────────────────────
+  // ── DATA ───────────────────────────────────────────────────────────────
   function loadData() {
     try { return JSON.parse(localStorage.getItem('een_vs_100') || '{"questions":[]}'); }
     catch { return { questions: [] }; }
   }
-  function saveData(data) {
-    localStorage.setItem('een_vs_100', JSON.stringify(data));
-    updateHeaderStats();
-  }
-  function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function saveData(d) { localStorage.setItem('een_vs_100', JSON.stringify(d)); updateHeaderStats(); }
+  function genId()     { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
-  // ─── TABS ─────────────────────────────────────────────────────────────
+  // Gewogen gemiddelde: vragen met meer starters tellen zwaarder mee.
+  // Vragen zonder starters krijgen gewicht 1 (minimale invloed).
+  function weightedAvgPct(qs) {
+    if (!qs.length) return null;
+    const totalW  = qs.reduce((s, q) => s + (q.starters || 1), 0);
+    const weightedSum = qs.reduce((s, q) => s + q.dropoutPct * (q.starters || 1), 0);
+    return Math.round(weightedSum / totalW);
+  }
+
+  // Betrouwbaarheidsindicator op basis van starters.
+  function reliabilityIndicator(starters) {
+    if (!starters) return `<span title="Geen spelaantal bekend" style="color:var(--placeholder);font-size:11px;">n=?</span>`;
+    const col   = starters >= 50 ? '#4ade80' : starters >= 15 ? '#fbbf24' : '#f87171';
+    const label = starters >= 50 ? 'hoog' : starters >= 15 ? 'midden' : 'laag';
+    return `<span title="${starters} starters — betrouwbaarheid ${label}" style="color:${col};font-size:11px;font-weight:600;">n=${starters}</span>`;
+  }
+
+  // ── TABS ───────────────────────────────────────────────────────────────
   function switchTab(tab) {
     ['invoer','bank','dashboard','export'].forEach(t => {
       document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
-      const btn = document.getElementById('tab-' + t);
-      if (t === tab) { btn.className = 'tab-active flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all'; }
-      else { btn.className = 'tab-inactive flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all'; }
+      document.getElementById('tab-' + t).classList.toggle('active', t === tab);
     });
     currentTab = tab;
-    if (tab === 'bank') renderBank();
+    if (tab === 'bank')      renderBank();
     if (tab === 'dashboard') renderDashboard();
-    if (tab === 'export') renderStorageInfo();
+    if (tab === 'export')    renderStorageInfo();
   }
 
-  // ─── FORM ─────────────────────────────────────────────────────────────
+  // ── FORM ───────────────────────────────────────────────────────────────
   function selectAnswer(val) {
-    selectedAnswer = val;
-    document.querySelectorAll('.answer-btn').forEach(btn => {
-      const isSelected = btn.dataset.val === val;
-      btn.style.background = isSelected ? '#f59e0b' : '#1e2a3a';
-      btn.style.color = isSelected ? '#0a0f1e' : '#94a3b8';
-      btn.style.borderColor = isSelected ? '#f59e0b' : '#374151';
+    selectedAnswer = selectedAnswer === val ? null : val;
+    ['A','B','C'].forEach(v => {
+      const el = document.getElementById('ab-' + v);
+      el.classList.toggle('active', v === selectedAnswer);
     });
   }
 
   function setClassMode(mode) {
     classMode = mode;
-    document.getElementById('cm-moeilijkheid').style.cssText = mode === 'moeilijkheid'
-      ? 'background:#f59e0b;color:#0a0f1e;border-color:#f59e0b;'
-      : 'background:#1e2a3a;color:#94a3b8;border-color:#374151;';
-    document.getElementById('cm-twee_cat').style.cssText = mode === 'twee_cat'
-      ? 'background:#f59e0b;color:#0a0f1e;border-color:#f59e0b;'
-      : 'background:#1e2a3a;color:#94a3b8;border-color:#374151;';
+    document.getElementById('cm-moeilijkheid').classList.toggle('active', mode === 'moeilijkheid');
+    document.getElementById('cm-twee_cat').classList.toggle('active', mode === 'twee_cat');
     document.getElementById('cl-moeilijkheid').classList.toggle('hidden', mode !== 'moeilijkheid');
     document.getElementById('cl-twee_cat').classList.toggle('hidden', mode !== 'twee_cat');
   }
 
   function selectDifficulty(val) {
-    selectedDiff = val;
-    ['makkelijk','moeilijk'].forEach(d => {
-      const btn = document.getElementById('diff-' + d);
-      const active = d === val;
-      btn.style.background = active ? (d === 'makkelijk' ? '#15803d' : '#b91c1c') : '#1e2a3a';
-      btn.style.color = active ? 'white' : '#94a3b8';
-      btn.style.borderColor = active ? (d === 'makkelijk' ? '#16a34a' : '#dc2626') : '#374151';
-    });
-  }
-
-  function handleCategoryChange() {
-    const sel = document.getElementById('f-category');
-    const custom = document.getElementById('f-category-custom');
-    custom.classList.toggle('hidden', sel.value !== '__custom__');
+    selectedDiff = selectedDiff === val ? null : val;
+    const mBtn = document.getElementById('diff-makkelijk');
+    const hBtn = document.getElementById('diff-moeilijk');
+    mBtn.className = 'tog' + (selectedDiff === 'makkelijk' ? ' active-easy' : '');
+    hBtn.className = 'tog' + (selectedDiff === 'moeilijk'  ? ' active-hard' : '');
   }
 
   function calcDropout() {
-    const s = parseInt(document.getElementById('f-starters').value) || 0;
-    const r = parseInt(document.getElementById('f-remaining').value) || 0;
+    const s = parseInt(document.getElementById('f-starters').value)  || 0;
+    const a = parseInt(document.getElementById('f-afvallers').value) || 0;
     const el = document.getElementById('dropout-preview');
-    if (s > 0 && r >= 0 && r <= s) {
-      const pct = Math.round((s - r) / s * 100);
+    if (s > 0 && a >= 0 && a <= s) {
+      const pct = Math.round(a / s * 100);
       el.textContent = pct + '%';
       el.style.color = pct >= 60 ? '#f87171' : pct <= 20 ? '#4ade80' : '#fbbf24';
     } else {
       el.textContent = '—';
-      el.style.color = '#6b7280';
+      el.style.color = 'var(--muted)';
     }
   }
 
@@ -495,137 +495,125 @@
     const ansA = document.getElementById('f-ans-a').value.trim();
     const ansB = document.getElementById('f-ans-b').value.trim();
     const ansC = document.getElementById('f-ans-c').value.trim();
-    const catSel = document.getElementById('f-category').value;
-    const category = catSel === '__custom__'
-      ? document.getElementById('f-category-custom').value.trim()
-      : catSel;
-    const starters = parseInt(document.getElementById('f-starters').value) || 0;
-    const remaining = parseInt(document.getElementById('f-remaining').value);
+    const starters  = parseInt(document.getElementById('f-starters').value)  || 0;
+    const afvallers = parseInt(document.getElementById('f-afvallers').value);
     const errEl = document.getElementById('form-error');
 
-    // Validatie
-    if (!question) return showError(errEl, 'Vul een vraag in.');
-    if (!ansA || !ansB || !ansC) return showError(errEl, 'Vul alle drie de antwoorden in.');
-    if (!selectedAnswer) return showError(errEl, 'Selecteer het juiste antwoord (klik op A, B of C).');
-    if (!category) return showError(errEl, 'Selecteer een categorie.');
-
-    let dropoutPct = null;
-    if (starters > 0 && !isNaN(remaining) && remaining >= 0 && remaining <= starters) {
-      dropoutPct = Math.round((starters - remaining) / starters * 100);
+    let category, category2 = null;
+    if (classMode === 'twee_cat') {
+      category  = document.getElementById('f-cat1').value.trim();
+      category2 = document.getElementById('f-cat2').value.trim() || null;
+    } else {
+      category = document.getElementById('f-category').value.trim();
     }
+
+    if (!question)        return showError(errEl, 'Vul een vraag in.');
+    if (!ansA||!ansB||!ansC) return showError(errEl, 'Vul alle drie de antwoorden in.');
+    if (!selectedAnswer)  return showError(errEl, 'Selecteer het juiste antwoord.');
+    if (!category)        return showError(errEl, 'Vul een categorie in.');
+
+    const dropoutPct = (starters > 0 && !isNaN(afvallers) && afvallers >= 0 && afvallers <= starters)
+      ? Math.round(afvallers / starters * 100) : null;
 
     const data = loadData();
     data.questions.push({
-      id: genId(),
-      text: question,
-      answerA: ansA, answerB: ansB, answerC: ansC,
-      correctAnswer: selectedAnswer,
-      category,
-      category2: classMode === 'twee_cat' ? document.getElementById('f-cat2').value || null : null,
-      classType: classMode,
+      id: genId(), text: question,
+      answerA: ansA, answerB: ansB, answerC: ansC, correctAnswer: selectedAnswer,
+      category, category2, classType: classMode,
       difficulty: classMode === 'moeilijkheid' ? selectedDiff : null,
       starters: starters || null,
-      remaining: isNaN(remaining) ? null : remaining,
+      afvallers: isNaN(afvallers) ? null : afvallers,
       dropoutPct,
       episode: document.getElementById('f-episode').value.trim() || null,
-      notes: document.getElementById('f-notes').value.trim() || null,
+      notes:   document.getElementById('f-notes').value.trim()   || null,
       dateAdded: new Date().toISOString(),
     });
     saveData(data);
-
     errEl.classList.add('hidden');
     resetForm();
-    showToast('Vraag opgeslagen! ✓');
+    showToast('Vraag opgeslagen ✓');
   }
 
   function showError(el, msg) { el.textContent = msg; el.classList.remove('hidden'); }
 
   function resetForm() {
-    ['f-question','f-ans-a','f-ans-b','f-ans-c','f-episode','f-notes','f-starters','f-remaining'].forEach(id => {
-      document.getElementById(id).value = '';
+    ['f-question','f-ans-a','f-ans-b','f-ans-c','f-episode','f-notes',
+     'f-starters','f-afvallers','f-category','f-cat1','f-cat2'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
     });
-    document.getElementById('f-category').value = '';
-    document.getElementById('f-category-custom').classList.add('hidden');
-    document.getElementById('f-cat2').value = '';
     document.getElementById('dropout-preview').textContent = '—';
-    document.getElementById('dropout-preview').style.color = '#6b7280';
+    document.getElementById('dropout-preview').style.color = 'var(--muted)';
     document.getElementById('form-error').classList.add('hidden');
-    selectedAnswer = null;
-    selectedDiff = null;
-    document.querySelectorAll('.answer-btn').forEach(btn => {
-      btn.style.background = '#1e2a3a'; btn.style.color = '#94a3b8'; btn.style.borderColor = '#374151';
-    });
-    ['makkelijk','moeilijk'].forEach(d => {
-      const btn = document.getElementById('diff-' + d);
-      if (btn) { btn.style.background = '#1e2a3a'; btn.style.color = '#94a3b8'; btn.style.borderColor = '#374151'; }
-    });
-    setClassMode('moeilijkheid');
+    selectedAnswer = null; selectedDiff = null;
+    ['A','B','C'].forEach(v => document.getElementById('ab-'+v)?.classList.remove('active'));
+    document.getElementById('diff-makkelijk').className = 'tog';
+    document.getElementById('diff-moeilijk').className  = 'tog';
+    if (classMode === 'twee_cat') setClassMode('moeilijkheid');
   }
 
-  // ─── VRAGENBANK ────────────────────────────────────────────────────────
+  // ── VRAGENBANK ─────────────────────────────────────────────────────────
   function renderBank() {
-    const data = loadData();
-    const search = document.getElementById('bank-search').value.toLowerCase();
-    const catFilter = document.getElementById('bank-cat').value;
+    const data     = loadData();
+    const search   = document.getElementById('bank-search').value.toLowerCase();
+    const catFilter  = document.getElementById('bank-cat').value;
     const diffFilter = document.getElementById('bank-diff').value;
-    const sort = document.getElementById('bank-sort').value;
+    const sort       = document.getElementById('bank-sort').value;
 
-    // Populate category filter
     const allCats = [...new Set(data.questions.map(q => q.category).filter(Boolean))].sort();
     const catSel = document.getElementById('bank-cat');
     const prevCat = catSel.value;
-    catSel.innerHTML = '<option value="">Alle categorieën</option>' + allCats.map(c => `<option ${c===prevCat?'selected':''}>${c}</option>`).join('');
+    catSel.innerHTML = '<option value="">Alle categorieën</option>'
+      + allCats.map(c => `<option${c===prevCat?' selected':''}>${c}</option>`).join('');
 
     let qs = data.questions.filter(q => {
       if (search && !q.text.toLowerCase().includes(search) && !(q.category||'').toLowerCase().includes(search)) return false;
-      if (catFilter && q.category !== catFilter) return false;
+      if (catFilter  && q.category  !== catFilter)  return false;
       if (diffFilter && q.difficulty !== diffFilter) return false;
       return true;
     });
 
     qs.sort((a, b) => {
-      if (sort === 'date-desc') return new Date(b.dateAdded) - new Date(a.dateAdded);
-      if (sort === 'date-asc') return new Date(a.dateAdded) - new Date(b.dateAdded);
-      if (sort === 'dropout-desc') return (b.dropoutPct ?? -1) - (a.dropoutPct ?? -1);
-      if (sort === 'dropout-asc') return (a.dropoutPct ?? 101) - (b.dropoutPct ?? 101);
-      if (sort === 'cat-asc') return (a.category||'').localeCompare(b.category||'', 'nl');
+      if (sort === 'date-desc')    return new Date(b.dateAdded) - new Date(a.dateAdded);
+      if (sort === 'date-asc')     return new Date(a.dateAdded) - new Date(b.dateAdded);
+      if (sort === 'dropout-desc') return (b.dropoutPct ?? -1)  - (a.dropoutPct ?? -1);
+      if (sort === 'dropout-asc')  return (a.dropoutPct ?? 101) - (b.dropoutPct ?? 101);
+      if (sort === 'cat-asc')      return (a.category||'').localeCompare(b.category||'','nl');
       return 0;
     });
 
-    const list = document.getElementById('bank-list');
+    document.getElementById('bank-count').textContent = `${qs.length} van ${data.questions.length} vragen`;
+    const list  = document.getElementById('bank-list');
     const empty = document.getElementById('bank-empty');
-    const count = document.getElementById('bank-count');
-    count.textContent = `${qs.length} van ${data.questions.length} vragen`;
 
-    if (qs.length === 0) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    if (!qs.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
     empty.classList.add('hidden');
 
     list.innerHTML = qs.map(q => {
       const pct = q.dropoutPct;
-      const pctBadge = pct !== null && pct !== undefined
-        ? `<span class="text-xs font-bold px-2 py-0.5 rounded ${pct >= 60 ? 'badge-hard' : pct <= 20 ? 'badge-easy' : 'badge-mid'}">${pct}% afval</span>`
-        : '';
+      const pctBadge = pct != null
+        ? `<span class="badge ${pct>=60?'badge-hard':pct<=20?'badge-easy':'badge-mid'}">${pct}%</span>` : '';
       const diffBadge = q.difficulty
-        ? `<span class="text-xs px-2 py-0.5 rounded ${q.difficulty === 'makkelijk' ? 'badge-easy' : 'badge-hard'}">${q.difficulty}</span>`
-        : '';
+        ? `<span class="badge ${q.difficulty==='makkelijk'?'badge-easy':'badge-hard'}">${q.difficulty}</span>` : '';
       const correctAns = q['answer' + q.correctAnswer];
+      const cat2 = q.category2 ? ` <span style="color:var(--muted);">+ ${escHtml(q.category2)}</span>` : '';
+      const nLabel = pct != null ? reliabilityIndicator(q.starters) : '';
       return `<div class="card p-4">
-        <div class="flex items-start justify-between gap-3">
-          <p class="text-sm text-white font-medium leading-snug flex-1">${escHtml(q.text)}</p>
+        <div class="flex items-start justify-between gap-3 mb-2">
+          <p class="text-sm font-medium leading-snug flex-1">${escHtml(q.text)}</p>
           <div class="flex gap-1.5 shrink-0 items-center">
+            ${nLabel}
             ${pctBadge}
-            <button onclick="openEdit('${q.id}')" class="btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.7rem;">Bewerk</button>
+            <button onclick="openEdit('${q.id}')" class="btn-edit">Bewerk</button>
             <button onclick="deleteQ('${q.id}')" class="btn-danger">✕</button>
           </div>
         </div>
-        <div class="flex flex-wrap gap-2 mt-2 items-center">
-          <span class="text-xs text-gray-500">${escHtml(q.category||'')}</span>
-          ${q.category2 ? `<span class="text-xs text-gray-600">+ ${escHtml(q.category2)}</span>` : ''}
+        <div class="flex flex-wrap gap-1.5 items-center" style="font-size:12px;">
+          <span style="color:var(--muted);">${escHtml(q.category||'')}${cat2}</span>
           ${diffBadge}
-          <span class="text-xs text-green-400 font-semibold">✓ ${escHtml(correctAns||'')}</span>
-          ${q.episode ? `<span class="text-xs text-gray-600">${escHtml(q.episode)}</span>` : ''}
+          <span style="color:#4ade80;font-weight:600;">✓ ${escHtml(correctAns||'')}</span>
+          ${q.episode ? `<span style="color:var(--muted);">${escHtml(q.episode)}</span>` : ''}
         </div>
-        ${q.notes ? `<p class="text-xs text-gray-500 mt-1.5 italic">${escHtml(q.notes)}</p>` : ''}
+        ${q.notes ? `<p class="text-xs mt-1.5 italic" style="color:var(--muted);">${escHtml(q.notes)}</p>` : ''}
       </div>`;
     }).join('');
   }
@@ -634,109 +622,130 @@
     if (!confirm('Vraag verwijderen?')) return;
     const data = loadData();
     data.questions = data.questions.filter(q => q.id !== id);
-    saveData(data);
-    renderBank();
+    saveData(data); renderBank();
   }
 
-  // ─── DASHBOARD ────────────────────────────────────────────────────────
+  // ── DASHBOARD ──────────────────────────────────────────────────────────
   function renderDashboard() {
     const { questions } = loadData();
-    const withPct = questions.filter(q => q.dropoutPct !== null && q.dropoutPct !== undefined);
+    const withPct = questions.filter(q => q.dropoutPct != null);
 
     document.getElementById('stat-total').textContent = questions.length;
-    if (withPct.length) {
-      const avg = Math.round(withPct.reduce((s, q) => s + q.dropoutPct, 0) / withPct.length);
-      document.getElementById('stat-avg').textContent = avg + '%';
-      document.getElementById('stat-avg').style.color = avg >= 60 ? '#f87171' : avg <= 20 ? '#4ade80' : '#fbbf24';
+    const avg = weightedAvgPct(withPct);
+    if (avg != null) {
+      const el = document.getElementById('stat-avg');
+      el.textContent = avg + '%';
+      el.style.color = avg >= 60 ? '#f87171' : avg <= 20 ? '#4ade80' : '#fbbf24';
     } else {
       document.getElementById('stat-avg').textContent = '—';
+      document.getElementById('stat-avg').style.color = '';
     }
 
-    // Per categorie
+    // Gewogen gemiddelde per categorie
     const catMap = {};
     for (const q of withPct) {
-      const cats = [q.category, q.category2].filter(Boolean);
-      cats.forEach(c => {
-        if (!catMap[c]) catMap[c] = { sum: 0, count: 0 };
-        catMap[c].sum += q.dropoutPct;
-        catMap[c].count++;
+      [q.category, q.category2].filter(Boolean).forEach(c => {
+        if (!catMap[c]) catMap[c] = { qs: [] };
+        catMap[c].qs.push(q);
       });
     }
-    const catStats = Object.entries(catMap)
-      .map(([cat, { sum, count }]) => ({ cat, avg: Math.round(sum / count), count }))
+    const cats = Object.entries(catMap)
+      .map(([cat, {qs}]) => ({
+        cat,
+        avg: weightedAvgPct(qs),
+        n: qs.length,
+        totalStarters: qs.reduce((s, q) => s + (q.starters || 0), 0),
+      }))
       .sort((a, b) => b.avg - a.avg);
 
-    document.getElementById('stat-hardest').textContent = catStats[0]?.cat || '—';
-    document.getElementById('stat-easiest').textContent = catStats[catStats.length - 1]?.cat || '—';
+    document.getElementById('stat-hardest').textContent = cats[0]?.cat || '—';
+    document.getElementById('stat-easiest').textContent = cats[cats.length-1]?.cat || '—';
 
     const chart = document.getElementById('cat-chart');
     const catEmpty = document.getElementById('cat-empty');
-    if (catStats.length === 0) { chart.innerHTML = ''; catEmpty.classList.remove('hidden'); }
+    if (!cats.length) { chart.innerHTML = ''; catEmpty.classList.remove('hidden'); }
     else {
       catEmpty.classList.add('hidden');
-      const max = Math.max(...catStats.map(c => c.avg), 1);
-      chart.innerHTML = catStats.map(c => {
-        const color = c.avg >= 60 ? '#ef4444' : c.avg <= 20 ? '#22c55e' : '#f59e0b';
+      const max = Math.max(...cats.map(c => c.avg), 1);
+      chart.innerHTML = cats.map(c => {
+        const col = c.avg>=60?'#ef4444':c.avg<=20?'#22c55e':'#f59e0b';
+        const reliCol = c.totalStarters >= 50 ? '#4ade80' : c.totalStarters >= 15 ? '#fbbf24' : '#71717a';
+        const relTip  = `${c.totalStarters} starters totaal`;
         return `<div>
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-xs text-gray-300 font-medium">${escHtml(c.cat)}</span>
-            <span class="text-xs font-bold" style="color:${color}">${c.avg}% <span class="text-gray-600 font-normal">(${c.count}v)</span></span>
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-sm font-medium">${escHtml(c.cat)}</span>
+            <div class="flex items-center gap-2">
+              <span title="${relTip}" style="color:${reliCol};font-size:11px;">n=${c.totalStarters||'?'}</span>
+              <span class="text-xs font-bold" style="color:${col}">${c.avg}%
+                <span style="color:var(--muted);font-weight:400;">(${c.n}v)</span>
+              </span>
+            </div>
           </div>
-          <div style="background:#1e2a3a;border-radius:4px;height:8px;">
-            <div class="bar" style="background:${color};width:${Math.round(c.avg/max*100)}%;height:8px;"></div>
+          <div style="background:var(--elevated);border-radius:3px;height:6px;">
+            <div class="bar" style="background:${col};width:${Math.round(c.avg/max*100)}%;opacity:${c.totalStarters>=50?1:c.totalStarters>=15?0.75:0.45};"></div>
           </div>
         </div>`;
       }).join('');
     }
 
-    const hard = withPct.filter(q => q.dropoutPct >= 60).sort((a, b) => b.dropoutPct - a.dropoutPct);
-    const easy = withPct.filter(q => q.dropoutPct <= 20).sort((a, b) => a.dropoutPct - b.dropoutPct);
+    // Lijsten gesorteerd op gewogen invloed (starters × afval%) zodat kleine groepjes minder prominent staan
+    const hard = withPct
+      .filter(q => q.dropoutPct >= 60)
+      .sort((a, b) => (b.dropoutPct * (b.starters||1)) - (a.dropoutPct * (a.starters||1)));
+    const easy = withPct
+      .filter(q => q.dropoutPct <= 20)
+      .sort((a, b) => (a.dropoutPct * (b.starters||1)) - (b.dropoutPct * (a.starters||1)));
 
-    const hardList = document.getElementById('hard-list');
-    const hardEmpty = document.getElementById('hard-empty');
-    if (hard.length === 0) { hardList.innerHTML = ''; hardEmpty.classList.remove('hidden'); }
+    const hList = document.getElementById('hard-list');
+    const hEmpty = document.getElementById('hard-empty');
+    if (!hard.length) { hList.innerHTML=''; hEmpty.classList.remove('hidden'); }
     else {
-      hardEmpty.classList.add('hidden');
-      hardList.innerHTML = hard.slice(0, 10).map(q => `
-        <div class="flex justify-between items-start gap-2 py-1 border-b border-gray-800 last:border-0">
-          <p class="text-xs text-gray-300 leading-snug flex-1">${escHtml(q.text.slice(0, 80))}${q.text.length > 80 ? '…' : ''}</p>
-          <span class="text-xs font-black text-red-400 shrink-0">${q.dropoutPct}%</span>
-        </div>`).join('');
+      hEmpty.classList.add('hidden');
+      hList.innerHTML = hard.slice(0,10).map(q => {
+        const reliCol = (q.starters||0) >= 50 ? '#4ade80' : (q.starters||0) >= 15 ? '#fbbf24' : '#71717a';
+        return `<div class="flex justify-between gap-2 py-1.5" style="border-bottom:1px solid var(--border);">
+          <p class="text-xs leading-snug flex-1" style="color:#a1a1aa;">${escHtml(q.text.slice(0,80))}${q.text.length>80?'…':''}</p>
+          <div class="flex gap-1.5 items-center shrink-0">
+            <span style="color:${reliCol};font-size:10px;">n=${q.starters||'?'}</span>
+            <span class="text-xs font-black" style="color:#f87171;">${q.dropoutPct}%</span>
+          </div>
+        </div>`;
+      }).join('');
     }
 
-    const easyList = document.getElementById('easy-list');
-    const easyEmpty = document.getElementById('easy-empty');
-    if (easy.length === 0) { easyList.innerHTML = ''; easyEmpty.classList.remove('hidden'); }
+    const eList = document.getElementById('easy-list');
+    const eEmpty = document.getElementById('easy-empty');
+    if (!easy.length) { eList.innerHTML=''; eEmpty.classList.remove('hidden'); }
     else {
-      easyEmpty.classList.add('hidden');
-      easyList.innerHTML = easy.slice(0, 10).map(q => `
-        <div class="flex justify-between items-start gap-2 py-1 border-b border-gray-800 last:border-0">
-          <p class="text-xs text-gray-300 leading-snug flex-1">${escHtml(q.text.slice(0, 80))}${q.text.length > 80 ? '…' : ''}</p>
-          <span class="text-xs font-black text-green-400 shrink-0">${q.dropoutPct}%</span>
-        </div>`).join('');
+      eEmpty.classList.add('hidden');
+      eList.innerHTML = easy.slice(0,10).map(q => {
+        const reliCol = (q.starters||0) >= 50 ? '#4ade80' : (q.starters||0) >= 15 ? '#fbbf24' : '#71717a';
+        return `<div class="flex justify-between gap-2 py-1.5" style="border-bottom:1px solid var(--border);">
+          <p class="text-xs leading-snug flex-1" style="color:#a1a1aa;">${escHtml(q.text.slice(0,80))}${q.text.length>80?'…':''}</p>
+          <div class="flex gap-1.5 items-center shrink-0">
+            <span style="color:${reliCol};font-size:10px;">n=${q.starters||'?'}</span>
+            <span class="text-xs font-black" style="color:#4ade80;">${q.dropoutPct}%</span>
+          </div>
+        </div>`;
+      }).join('');
     }
   }
 
-  // ─── EDIT MODAL ───────────────────────────────────────────────────────
+  // ── EDIT MODAL ─────────────────────────────────────────────────────────
   function openEdit(id) {
-    const data = loadData();
-    const q = data.questions.find(x => x.id === id);
+    const q = loadData().questions.find(x => x.id === id);
     if (!q) return;
-    editId = id;
-    editAnswer = q.correctAnswer;
-    editDiff = q.difficulty;
-    document.getElementById('e-question').value = q.text;
-    document.getElementById('e-ans-a').value = q.answerA;
-    document.getElementById('e-ans-b').value = q.answerB;
-    document.getElementById('e-ans-c').value = q.answerC;
-    document.getElementById('e-category').value = q.category || '';
-    document.getElementById('e-episode').value = q.episode || '';
-    document.getElementById('e-starters').value = q.starters || '';
-    document.getElementById('e-remaining').value = q.remaining ?? '';
-    document.getElementById('e-notes').value = q.notes || '';
-    calcEditDropout();
-    refreshEditAnswerBtns();
-    refreshEditDiffBtns();
+    editId = id; editAnswer = q.correctAnswer; editDiff = q.difficulty;
+    document.getElementById('e-question').value  = q.text;
+    document.getElementById('e-ans-a').value     = q.answerA;
+    document.getElementById('e-ans-b').value     = q.answerB;
+    document.getElementById('e-ans-c').value     = q.answerC;
+    document.getElementById('e-category').value  = q.category || '';
+    document.getElementById('e-episode').value   = q.episode  || '';
+    document.getElementById('e-starters').value  = q.starters  || '';
+    document.getElementById('e-afvallers').value = q.afvallers ?? '';
+    document.getElementById('e-notes').value     = q.notes    || '';
+    calcEditDropout(); refreshEditAnswerBtns(); refreshEditDiffBtns();
     document.getElementById('edit-modal').classList.remove('hidden');
     document.getElementById('edit-modal').classList.add('flex');
   }
@@ -752,9 +761,9 @@
     const data = loadData();
     const idx = data.questions.findIndex(x => x.id === editId);
     if (idx === -1) return;
-    const s = parseInt(document.getElementById('e-starters').value) || 0;
-    const r = parseInt(document.getElementById('e-remaining').value);
-    const dropoutPct = (s > 0 && !isNaN(r) && r >= 0 && r <= s) ? Math.round((s - r) / s * 100) : null;
+    const s = parseInt(document.getElementById('e-starters').value)  || 0;
+    const a = parseInt(document.getElementById('e-afvallers').value);
+    const dropoutPct = (s>0 && !isNaN(a) && a>=0 && a<=s) ? Math.round(a/s*100) : null;
     data.questions[idx] = {
       ...data.questions[idx],
       text: document.getElementById('e-question').value.trim(),
@@ -762,165 +771,123 @@
       answerB: document.getElementById('e-ans-b').value.trim(),
       answerC: document.getElementById('e-ans-c').value.trim(),
       correctAnswer: editAnswer,
-      category: document.getElementById('e-category').value,
-      episode: document.getElementById('e-episode').value.trim() || null,
+      category: document.getElementById('e-category').value.trim(),
+      episode:  document.getElementById('e-episode').value.trim() || null,
       difficulty: editDiff,
-      starters: s || null,
-      remaining: isNaN(r) ? null : r,
-      dropoutPct,
+      starters: s || null, afvallers: isNaN(a)?null:a, dropoutPct,
       notes: document.getElementById('e-notes').value.trim() || null,
     };
-    saveData(data);
-    closeEdit();
-    renderBank();
-    showToast('Vraag bijgewerkt ✓');
+    saveData(data); closeEdit(); renderBank(); showToast('Bijgewerkt ✓');
   }
 
-  function selectEditAnswer(val) {
-    editAnswer = val;
-    refreshEditAnswerBtns();
-  }
+  function selectEditAnswer(val) { editAnswer = val; refreshEditAnswerBtns(); }
   function refreshEditAnswerBtns() {
-    document.querySelectorAll('.edit-answer-btn').forEach(btn => {
-      const active = btn.dataset.val === editAnswer;
-      btn.style.background = active ? '#f59e0b' : '#1e2a3a';
-      btn.style.color = active ? '#0a0f1e' : '#94a3b8';
-      btn.style.borderColor = active ? '#f59e0b' : '#374151';
+    ['A','B','C'].forEach(v => {
+      document.getElementById('eab-'+v).classList.toggle('active', v === editAnswer);
     });
   }
 
-  function selectEditDifficulty(val) {
-    editDiff = val;
-    refreshEditDiffBtns();
-  }
+  function selectEditDifficulty(val) { editDiff = val; refreshEditDiffBtns(); }
   function refreshEditDiffBtns() {
-    const map = { makkelijk: { active: '#15803d', border: '#16a34a' }, moeilijk: { active: '#b91c1c', border: '#dc2626' }, null: { active: '#f59e0b', border: '#f59e0b' } };
-    ['makkelijk','moeilijk','none'].forEach(d => {
-      const key = d === 'none' ? null : d;
-      const btn = document.getElementById('e-diff-' + d);
-      if (!btn) return;
-      const active = editDiff === key;
-      const colors = map[key] || map.null;
-      btn.style.background = active ? colors.active : '#1e2a3a';
-      btn.style.color = active ? 'white' : '#94a3b8';
-      btn.style.borderColor = active ? colors.border : '#374151';
-    });
+    document.getElementById('e-diff-makkelijk').className = 'tog flex-1' + (editDiff==='makkelijk'?' active-easy':'');
+    document.getElementById('e-diff-moeilijk').className  = 'tog flex-1' + (editDiff==='moeilijk' ?' active-hard':'');
+    document.getElementById('e-diff-none').className      = 'tog flex-1' + (editDiff===null       ?' active-easy':'');
   }
 
   function calcEditDropout() {
-    const s = parseInt(document.getElementById('e-starters').value) || 0;
-    const r = parseInt(document.getElementById('e-remaining').value);
+    const s = parseInt(document.getElementById('e-starters').value)  || 0;
+    const a = parseInt(document.getElementById('e-afvallers').value);
     const el = document.getElementById('e-dropout-preview');
-    if (s > 0 && !isNaN(r) && r >= 0 && r <= s) {
-      const pct = Math.round((s - r) / s * 100);
+    if (s>0 && !isNaN(a) && a>=0 && a<=s) {
+      const pct = Math.round(a/s*100);
       el.textContent = pct + '%';
-      el.style.color = pct >= 60 ? '#f87171' : pct <= 20 ? '#4ade80' : '#fbbf24';
-    } else { el.textContent = '—'; el.style.color = '#9ca3af'; }
+      el.style.color = pct>=60?'#f87171':pct<=20?'#4ade80':'#fbbf24';
+    } else { el.textContent='—'; el.style.color='var(--muted)'; }
   }
 
-  // ─── EXPORT / IMPORT ──────────────────────────────────────────────────
+  // ── EXPORT / IMPORT ────────────────────────────────────────────────────
   function exportCSV() {
     const { questions } = loadData();
     if (!questions.length) { showToast('Geen vragen om te exporteren.'); return; }
-    const headers = ['id','text','answerA','answerB','answerC','correctAnswer','category','category2','difficulty','starters','remaining','dropoutPct','episode','notes','dateAdded'];
-    const rows = questions.map(q => headers.map(h => {
-      const val = q[h] ?? '';
-      return '"' + String(val).replace(/"/g, '""') + '"';
-    }).join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = '1vs100-vragen.csv'; a.click();
-    URL.revokeObjectURL(url);
+    const headers = ['id','text','answerA','answerB','answerC','correctAnswer','category','category2',
+                     'difficulty','starters','afvallers','dropoutPct','episode','notes','dateAdded'];
+    const rows = questions.map(q => headers.map(h => '"' + String(q[h]??'').replace(/"/g,'""') + '"').join(','));
+    const blob = new Blob(['﻿' + [headers.join(','),...rows].join('\n')], { type:'text/csv;charset=utf-8' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: '1vs100.csv' });
+    a.click(); URL.revokeObjectURL(a.href);
   }
 
   function importCSV(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
-      const lines = ev.target.result.replace(/^﻿/, '').split('\n').filter(l => l.trim());
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
-      const data = loadData();
-      let added = 0;
-      for (let i = 1; i < lines.length; i++) {
-        const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g) || [];
-        const obj = {};
-        headers.forEach((h, j) => { obj[h] = (vals[j] || '').replace(/^"|"$/g, '').replace(/""/g, '"'); });
-        if (obj.id && !data.questions.find(q => q.id === obj.id)) {
-          obj.starters = obj.starters ? parseInt(obj.starters) : null;
-          obj.remaining = obj.remaining !== '' ? parseInt(obj.remaining) : null;
-          obj.dropoutPct = obj.dropoutPct !== '' ? parseInt(obj.dropoutPct) : null;
-          obj.category2 = obj.category2 || null;
-          obj.difficulty = obj.difficulty || null;
-          obj.episode = obj.episode || null;
-          obj.notes = obj.notes || null;
-          data.questions.push(obj);
-          added++;
+      const lines = ev.target.result.replace(/^﻿/,'').split('\n').filter(l=>l.trim());
+      const headers = lines[0].split(',').map(h=>h.replace(/"/g,''));
+      const data = loadData(); let added = 0;
+      for (let i=1;i<lines.length;i++) {
+        const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g)||[];
+        const obj  = {}; headers.forEach((h,j)=>{ obj[h]=(vals[j]||'').replace(/^"|"$/g,'').replace(/""/g,'"'); });
+        if (obj.id && !data.questions.find(q=>q.id===obj.id)) {
+          obj.starters  = obj.starters  ? parseInt(obj.starters)  : null;
+          obj.afvallers = obj.afvallers !== ''? parseInt(obj.afvallers) : null;
+          obj.dropoutPct= obj.dropoutPct!==''? parseInt(obj.dropoutPct): null;
+          ['category2','difficulty','episode','notes'].forEach(k=>{ obj[k]=obj[k]||null; });
+          data.questions.push(obj); added++;
         }
       }
-      saveData(data);
-      showToast(`${added} vra${added === 1 ? 'ag' : 'gen'} geïmporteerd ✓`);
-      e.target.value = '';
-      renderStorageInfo();
+      saveData(data); showToast(`${added} vra${added===1?'ag':'gen'} geïmporteerd ✓`);
+      e.target.value=''; renderStorageInfo();
     };
     reader.readAsText(file);
   }
 
   function clearAll() {
-    if (!confirm('Weet je zeker dat je ALLE vragen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.')) return;
-    if (!confirm('Echt zeker? Alle data gaat verloren.')) return;
-    localStorage.removeItem('een_vs_100');
-    updateHeaderStats();
-    renderStorageInfo();
+    if (!confirm('Weet je zeker dat je ALLE vragen wilt verwijderen?')) return;
+    if (!confirm('Echt zeker? Dit kan niet ongedaan worden gemaakt.')) return;
+    localStorage.removeItem('een_vs_100'); updateHeaderStats(); renderStorageInfo();
     showToast('Alle data gewist.');
   }
 
   function renderStorageInfo() {
     const { questions } = loadData();
-    const raw = localStorage.getItem('een_vs_100') || '';
-    const kb = (new Blob([raw]).size / 1024).toFixed(1);
+    const raw = localStorage.getItem('een_vs_100')||'';
+    const kb  = (new Blob([raw]).size/1024).toFixed(1);
     document.getElementById('storage-info').innerHTML = `
-      <div class="flex justify-between"><span class="text-gray-500">Vragen</span><span>${questions.length}</span></div>
-      <div class="flex justify-between"><span class="text-gray-500">Opslag gebruikt</span><span>${kb} KB</span></div>
-      <div class="flex justify-between"><span class="text-gray-500">Locatie</span><span class="text-gray-400">Browser (localStorage)</span></div>
-    `;
+      <div class="flex justify-between"><span style="color:var(--muted);">Vragen</span><span>${questions.length}</span></div>
+      <div class="flex justify-between"><span style="color:var(--muted);">Opslag</span><span>${kb} KB</span></div>
+      <div class="flex justify-between"><span style="color:var(--muted);">Locatie</span><span style="color:var(--muted);">localStorage</span></div>`;
   }
 
-  // ─── HEADER STATS ─────────────────────────────────────────────────────
+  // ── HEADER STATS ───────────────────────────────────────────────────────
   function updateHeaderStats() {
     const { questions } = loadData();
     document.getElementById('hs-total').textContent = questions.length;
-    const withPct = questions.filter(q => q.dropoutPct !== null && q.dropoutPct !== undefined);
-    if (withPct.length) {
-      const avg = Math.round(withPct.reduce((s, q) => s + q.dropoutPct, 0) / withPct.length);
-      document.getElementById('hs-avg').textContent = avg + '%';
-    } else {
-      document.getElementById('hs-avg').textContent = '—';
-    }
+    const withPct = questions.filter(q => q.dropoutPct != null);
+    const avg = weightedAvgPct(withPct);
+    document.getElementById('hs-avg').textContent = avg != null ? avg + '%' : '—';
   }
 
-  // ─── TOAST ────────────────────────────────────────────────────────────
+  // ── TOAST ──────────────────────────────────────────────────────────────
   function showToast(msg) {
     const t = document.createElement('div');
     t.textContent = msg;
-    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e2a3a;color:white;border:1px solid #374151;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
+    Object.assign(t.style, {
+      position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
+      background:'var(--surface)', color:'var(--text)', border:'1px solid var(--border-hi)',
+      padding:'10px 20px', borderRadius:'10px', fontSize:'13px', fontWeight:'600',
+      zIndex:'9999', whiteSpace:'nowrap', boxShadow:'0 4px 24px rgba(0,0,0,0.5)',
+    });
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 2500);
   }
 
-  // ─── UTILS ────────────────────────────────────────────────────────────
-  function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // ── UTILS ──────────────────────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ─── INIT ─────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    updateHeaderStats();
-    // Show answer hint after a moment
-    setTimeout(() => document.getElementById('answer-hint')?.classList.remove('hidden'), 500);
-  });
+  // ── INIT ───────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', updateHeaderStats);
   </script>
 </body>
 </html>
