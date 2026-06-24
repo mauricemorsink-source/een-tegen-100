@@ -415,12 +415,68 @@
   let editId = null, editAnswer = null, editDiff = null;
 
   // ── DATA ───────────────────────────────────────────────────────────────
-  function loadData() {
-    try { return JSON.parse(localStorage.getItem('een_vs_100') || '{"questions":[]}'); }
-    catch { return { questions: [] }; }
+  let _questions = null; // in-memory cache
+
+  function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  async function loadQuestions() {
+    try {
+      const res = await fetch('/api/questions');
+      if (!res.ok) throw new Error('api error');
+      _questions = await res.json();
+      // Neon geeft snake_case terug — map naar camelCase
+      _questions = _questions.map(mapRow);
+    } catch {
+      // Fallback naar localStorage als de API niet bereikbaar is
+      try { _questions = JSON.parse(localStorage.getItem('een_vs_100_qs') || '[]'); }
+      catch { _questions = []; }
+    }
+    updateHeaderStats();
+    return _questions;
   }
-  function saveData(d) { localStorage.setItem('een_vs_100', JSON.stringify(d)); updateHeaderStats(); }
-  function genId()     { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  function mapRow(r) {
+    return {
+      id: r.id, text: r.text,
+      answerA: r.answer_a, answerB: r.answer_b, answerC: r.answer_c,
+      correctAnswer: r.correct_answer,
+      category: r.category, category2: r.category2,
+      classType: r.class_type, difficulty: r.difficulty,
+      starters: r.starters, afvallers: r.afvallers, dropoutPct: r.dropout_pct,
+      episode: r.episode, notes: r.notes,
+      dateAdded: r.date_added,
+    };
+  }
+
+  async function apiSave(q) {
+    await fetch('/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(q),
+    });
+    // Voeg toe aan cache
+    _questions = [q, ...(_questions || []).filter(x => x.id !== q.id)];
+    updateHeaderStats();
+  }
+
+  async function apiUpdate(id, q) {
+    await fetch(`/api/question?id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(q),
+    });
+    if (_questions) {
+      const idx = _questions.findIndex(x => x.id === id);
+      if (idx !== -1) _questions[idx] = { ..._questions[idx], ...q };
+    }
+    updateHeaderStats();
+  }
+
+  async function apiDelete(id) {
+    await fetch(`/api/question?id=${id}`, { method: 'DELETE' });
+    if (_questions) _questions = _questions.filter(x => x.id !== id);
+    updateHeaderStats();
+  }
 
   // Gewogen gemiddelde: vragen met meer starters tellen zwaarder mee.
   // Vragen zonder starters krijgen gewicht 1 (minimale invloed).
@@ -449,6 +505,12 @@
     if (tab === 'bank')      renderBank();
     if (tab === 'dashboard') renderDashboard();
     if (tab === 'export')    renderStorageInfo();
+  }
+
+  async function refreshAndRender() {
+    await loadQuestions();
+    if (currentTab === 'bank')      renderBank();
+    if (currentTab === 'dashboard') renderDashboard();
   }
 
   // ── FORM ───────────────────────────────────────────────────────────────
@@ -490,7 +552,7 @@
     }
   }
 
-  function submitForm() {
+  async function submitForm() {
     const question = document.getElementById('f-question').value.trim();
     const ansA = document.getElementById('f-ans-a').value.trim();
     const ansB = document.getElementById('f-ans-b').value.trim();
@@ -507,16 +569,15 @@
       category = document.getElementById('f-category').value.trim();
     }
 
-    if (!question)        return showError(errEl, 'Vul een vraag in.');
+    if (!question)           return showError(errEl, 'Vul een vraag in.');
     if (!ansA||!ansB||!ansC) return showError(errEl, 'Vul alle drie de antwoorden in.');
-    if (!selectedAnswer)  return showError(errEl, 'Selecteer het juiste antwoord.');
-    if (!category)        return showError(errEl, 'Vul een categorie in.');
+    if (!selectedAnswer)     return showError(errEl, 'Selecteer het juiste antwoord.');
+    if (!category)           return showError(errEl, 'Vul een categorie in.');
 
     const dropoutPct = (starters > 0 && !isNaN(afvallers) && afvallers >= 0 && afvallers <= starters)
       ? Math.round(afvallers / starters * 100) : null;
 
-    const data = loadData();
-    data.questions.push({
+    const q = {
       id: genId(), text: question,
       answerA: ansA, answerB: ansB, answerC: ansC, correctAnswer: selectedAnswer,
       category, category2, classType: classMode,
@@ -527,11 +588,20 @@
       episode: document.getElementById('f-episode').value.trim() || null,
       notes:   document.getElementById('f-notes').value.trim()   || null,
       dateAdded: new Date().toISOString(),
-    });
-    saveData(data);
+    };
+
     errEl.classList.add('hidden');
-    resetForm();
-    showToast('Vraag opgeslagen ✓');
+    const saveBtn = document.querySelector('[onclick="submitForm()"]');
+    saveBtn.disabled = true; saveBtn.textContent = 'Opslaan...';
+    try {
+      await apiSave(q);
+      resetForm();
+      showToast('Vraag opgeslagen ✓');
+    } catch {
+      showError(errEl, 'Opslaan mislukt — controleer je verbinding.');
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = 'Vraag opslaan';
+    }
   }
 
   function showError(el, msg) { el.textContent = msg; el.classList.remove('hidden'); }
@@ -553,19 +623,19 @@
 
   // ── VRAGENBANK ─────────────────────────────────────────────────────────
   function renderBank() {
-    const data     = loadData();
+    const questions = _questions || [];
     const search   = document.getElementById('bank-search').value.toLowerCase();
     const catFilter  = document.getElementById('bank-cat').value;
     const diffFilter = document.getElementById('bank-diff').value;
     const sort       = document.getElementById('bank-sort').value;
 
-    const allCats = [...new Set(data.questions.map(q => q.category).filter(Boolean))].sort();
+    const allCats = [...new Set(questions.map(q => q.category).filter(Boolean))].sort();
     const catSel = document.getElementById('bank-cat');
     const prevCat = catSel.value;
     catSel.innerHTML = '<option value="">Alle categorieën</option>'
       + allCats.map(c => `<option${c===prevCat?' selected':''}>${c}</option>`).join('');
 
-    let qs = data.questions.filter(q => {
+    let qs = questions.filter(q => {
       if (search && !q.text.toLowerCase().includes(search) && !(q.category||'').toLowerCase().includes(search)) return false;
       if (catFilter  && q.category  !== catFilter)  return false;
       if (diffFilter && q.difficulty !== diffFilter) return false;
@@ -581,7 +651,7 @@
       return 0;
     });
 
-    document.getElementById('bank-count').textContent = `${qs.length} van ${data.questions.length} vragen`;
+    document.getElementById('bank-count').textContent = `${qs.length} van ${questions.length} vragen`;
     const list  = document.getElementById('bank-list');
     const empty = document.getElementById('bank-empty');
 
@@ -618,16 +688,16 @@
     }).join('');
   }
 
-  function deleteQ(id) {
+  async function deleteQ(id) {
     if (!confirm('Vraag verwijderen?')) return;
-    const data = loadData();
-    data.questions = data.questions.filter(q => q.id !== id);
-    saveData(data); renderBank();
+    await apiDelete(id);
+    renderBank();
+    if (currentTab === 'dashboard') renderDashboard();
   }
 
   // ── DASHBOARD ──────────────────────────────────────────────────────────
   function renderDashboard() {
-    const { questions } = loadData();
+    const questions = _questions || [];
     const withPct = questions.filter(q => q.dropoutPct != null);
 
     document.getElementById('stat-total').textContent = questions.length;
@@ -756,16 +826,12 @@
     editId = null;
   }
 
-  function saveEdit() {
+  async function saveEdit() {
     if (!editId) return;
-    const data = loadData();
-    const idx = data.questions.findIndex(x => x.id === editId);
-    if (idx === -1) return;
     const s = parseInt(document.getElementById('e-starters').value)  || 0;
     const a = parseInt(document.getElementById('e-afvallers').value);
     const dropoutPct = (s>0 && !isNaN(a) && a>=0 && a<=s) ? Math.round(a/s*100) : null;
-    data.questions[idx] = {
-      ...data.questions[idx],
+    const updates = {
       text: document.getElementById('e-question').value.trim(),
       answerA: document.getElementById('e-ans-a').value.trim(),
       answerB: document.getElementById('e-ans-b').value.trim(),
@@ -777,7 +843,8 @@
       starters: s || null, afvallers: isNaN(a)?null:a, dropoutPct,
       notes: document.getElementById('e-notes').value.trim() || null,
     };
-    saveData(data); closeEdit(); renderBank(); showToast('Bijgewerkt ✓');
+    await apiUpdate(editId, updates);
+    closeEdit(); renderBank(); showToast('Bijgewerkt ✓');
   }
 
   function selectEditAnswer(val) { editAnswer = val; refreshEditAnswerBtns(); }
@@ -849,18 +916,15 @@
   }
 
   function renderStorageInfo() {
-    const { questions } = loadData();
-    const raw = localStorage.getItem('een_vs_100')||'';
-    const kb  = (new Blob([raw]).size/1024).toFixed(1);
+    const questions = _questions || [];
     document.getElementById('storage-info').innerHTML = `
       <div class="flex justify-between"><span style="color:var(--muted);">Vragen</span><span>${questions.length}</span></div>
-      <div class="flex justify-between"><span style="color:var(--muted);">Opslag</span><span>${kb} KB</span></div>
-      <div class="flex justify-between"><span style="color:var(--muted);">Locatie</span><span style="color:var(--muted);">localStorage</span></div>`;
+      <div class="flex justify-between"><span style="color:var(--muted);">Locatie</span><span style="color:var(--muted);">Neon Postgres</span></div>`;
   }
 
   // ── HEADER STATS ───────────────────────────────────────────────────────
   function updateHeaderStats() {
-    const { questions } = loadData();
+    const questions = _questions || [];
     document.getElementById('hs-total').textContent = questions.length;
     const withPct = questions.filter(q => q.dropoutPct != null);
     const avg = weightedAvgPct(withPct);
@@ -887,7 +951,7 @@
   }
 
   // ── INIT ───────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', updateHeaderStats);
+  document.addEventListener('DOMContentLoaded', () => loadQuestions());
   </script>
 </body>
 </html>
